@@ -1,50 +1,132 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
+  font-family: 'Inter', sans-serif;
   background: #0f172a;
   color: #e5e7eb;
-  font-family: Arial, sans-serif;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.app {
-  width: 350px;
+header, footer {
   background: #020617;
-  padding: 20px;
-  border-radius: 14px;
   text-align: center;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
 }
 
-.search {
+footer {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-top: auto;
+}
+
+.container {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  flex: 1;
+  gap: 20px;
+  padding: 20px;
 }
 
-input {
-  flex: 1;
+.sidebar {
+  width: 280px;
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar input {
   padding: 10px;
   border-radius: 8px;
   border: none;
+  margin-bottom: 10px;
 }
 
-button {
+.sidebar button {
   padding: 10px;
   border-radius: 8px;
   border: none;
   background: #22c55e;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.3s;
 }
 
-button:hover {
+.sidebar button:hover {
   background: #16a34a;
 }
 
-.card {
-  margin-top: 15px;
-  background: #020617;
+#trackedList {
+  list-style: none;
+  margin-top: 10px;
+}
+
+#trackedList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #0f172a;
+  margin-bottom: 5px;
+}
+
+.dashboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.chart-card {
+  background: #1e293b;
+  border-radius: 16px;
   padding: 15px;
-  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.chart-header h3 {
+  margin: 0;
+  color: #22c55e;
+}
+
+.current-price {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.price-up {
+  color: #22c55e;
+}
+
+.price-down {
+  color: #ef4444;
+}
+
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    margin-bottom: 20px;
+  }
 }
