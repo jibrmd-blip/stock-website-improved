@@ -3,39 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stock Market Tracker</title>
+  <title>Pro Stock Dashboard</title>
 
-  <!-- Link CSS -->
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Lightweight Charts -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <header>
-    <h1>📊 Stock Market Tracker</h1>
-    <p>A simple market tracking website</p>
+    <h1>📈 Pro Stock Dashboard</h1>
+    <p>Track live stocks with candlestick charts</p>
   </header>
 
-  <main>
-    <section class="card">
-      <h2>Track a Stock</h2>
+  <main class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>Add Stock</h2>
+      <input type="text" id="symbol" placeholder="Enter symbol (AAPL, TSLA)" />
+      <button id="trackBtn">Add Stock</button>
+      <small>Max 5 stocks</small>
+      <ul id="trackedList"></ul>
+    </aside>
 
-      <input
-        type="text"
-        id="symbol"
-        placeholder="Enter stock symbol (AAPL, TSLA)"
-      />
-
-      <button id="trackBtn">Track</button>
-
-      <div id="result"></div>
+    <!-- Dashboard -->
+    <section class="dashboard">
+      <div id="chartsContainer">
+        <p>Add a stock to start tracking.</p>
+      </div>
     </section>
   </main>
 
   <footer>
-    <p>Built for GitHub Pages</p>
+    <p>Built with Alpha Vantage API & Lightweight Charts | GitHub Pages</p>
   </footer>
 
-  <!-- Link JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>
