@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const FINNHUB_API_KEY = "d69m7k1r01qhe6mo0p7gd69m7k1r01qhe6mo0p80";
+  const POLYGON_API_KEY = "KJgcLne4dvI_wNG_UU2Tn0LsuyaJbJLo"; // Your Polygon key
   const trackBtn = document.getElementById("trackBtn");
   const symbolInput = document.getElementById("symbol");
   const trackedList = document.getElementById("trackedList");
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     symbolInput.value = "";
     updateTrackedList();
     createChartCard(symbol);
-    fetchFinnhubData(symbol);
+    fetchPolygonData(symbol);
   });
 
   function updateTrackedList() {
@@ -55,33 +55,33 @@ document.addEventListener("DOMContentLoaded", () => {
     chartsContainer.appendChild(card);
   }
 
-  async function fetchFinnhubData(symbol) {
+  async function fetchPolygonData(symbol) {
     try {
-      const now = Math.floor(Date.now() / 1000);
-      const from = now - 60 * 60 * 24 * 7; // last 7 days
-      const candlesURL = `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=15&from=${from}&to=${now}&token=${FINNHUB_API_KEY}`;
-      const candleResp = await fetch(candlesURL);
-      const candleData = await candleResp.json();
+      const now = new Date();
+      const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // last 7 days
+      const fromStr = from.toISOString().split("T")[0];
+      const toStr = now.toISOString().split("T")[0];
 
-      if (!candleData || candleData.s !== "ok") throw new Error("No data returned");
+      const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/range/15/minute/${fromStr}/${toStr}?adjusted=true&sort=asc&apiKey=${POLYGON_API_KEY}`;
 
-      const candleArray = candleData.t.map((time, i) => ({
-        time: time,
-        open: candleData.o[i],
-        high: candleData.h[i],
-        low: candleData.l[i],
-        close: candleData.c[i]
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!data.results) throw new Error("No candle data returned");
+
+      const candles = data.results.map(c => ({
+        time: Math.floor(c.t / 1000),
+        open: c.o,
+        high: c.h,
+        low: c.l,
+        close: c.c
       }));
 
-      // Current price
-      const quoteURL = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`;
-      const quoteResp = await fetch(quoteURL);
-      const quoteData = await quoteResp.json();
-      const currentPrice = quoteData.c;
+      // Update current price (latest candle close)
+      const currentPrice = candles[candles.length - 1].close;
       const priceElem = document.getElementById(`price-${symbol}`);
       priceElem.textContent = `$${currentPrice.toFixed(2)}`;
 
-      // Chart
       if (!chartObjects[symbol]) {
         const chartDiv = document.getElementById(`chart-${symbol}`);
         const chart = LightweightCharts.createChart(chartDiv, {
@@ -98,20 +98,20 @@ document.addEventListener("DOMContentLoaded", () => {
           wickDownColor: "#ef4444"
         });
 
-        candleSeries.setData(candleArray);
+        candleSeries.setData(candles);
         chartObjects[symbol] = { candleSeries };
       } else {
-        chartObjects[symbol].candleSeries.setData(candleArray);
+        chartObjects[symbol].candleSeries.setData(candles);
       }
     } catch (err) {
-      console.error("Error loading data for", symbol, err);
+      console.error("Error fetching data for", symbol, err);
       const priceElem = document.getElementById(`price-${symbol}`);
       if (priceElem) priceElem.textContent = "Error";
     }
   }
 
-  // Auto refresh every 60s
+  // Auto-refresh every 60 seconds
   setInterval(() => {
-    trackedStocks.forEach(symbol => fetchFinnhubData(symbol));
+    trackedStocks.forEach(symbol => fetchPolygonData(symbol));
   }, 60000);
 });
