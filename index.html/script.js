@@ -1,13 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const POLYGON_API_KEY = "KJgcLne4dvI_wNG_UU2Tn0LsuyaJbJLo"; // Your Polygon key
+  const API_KEY = "IV50W0WMXPIW3V2R"; // Your new Alpha Vantage key
   const trackBtn = document.getElementById("trackBtn");
   const symbolInput = document.getElementById("symbol");
   const trackedList = document.getElementById("trackedList");
   const chartsContainer = document.getElementById("chartsContainer");
 
   let trackedStocks = [];
-  let chartObjects = {};
 
+  // Add stock
   trackBtn.addEventListener("click", () => {
     const symbol = symbolInput.value.trim().toUpperCase();
     if (!symbol) return;
@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
     trackedStocks.push(symbol);
     symbolInput.value = "";
     updateTrackedList();
-    createChartCard(symbol);
-    fetchPolygonData(symbol);
+    createStockCard(symbol);
+    fetchStockPrice(symbol);
   });
 
   function updateTrackedList() {
@@ -36,75 +36,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function removeStock(symbol) {
     trackedStocks = trackedStocks.filter(s => s !== symbol);
-    delete chartObjects[symbol];
     updateTrackedList();
-    chartsContainer.innerHTML = "";
-    trackedStocks.forEach(sym => createChartCard(sym));
+    const card = document.getElementById(`card-${symbol}`);
+    if (card) card.remove();
   }
 
-  function createChartCard(symbol) {
+  function createStockCard(symbol) {
     const card = document.createElement("div");
     card.classList.add("chart-card");
+    card.id = `card-${symbol}`;
     card.innerHTML = `
       <div class="chart-header">
         <h3>${symbol}</h3>
         <span id="price-${symbol}" class="current-price">Loading…</span>
       </div>
-      <div id="chart-${symbol}" style="height: 300px;"></div>
     `;
     chartsContainer.appendChild(card);
   }
 
-  async function fetchPolygonData(symbol) {
+  // Fetch current stock price from Alpha Vantage
+  async function fetchStockPrice(symbol) {
     try {
-      const now = new Date();
-      const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // last 7 days
-      const fromStr = from.toISOString().split("T")[0];
-      const toStr = now.toISOString().split("T")[0];
-
-      const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/range/15/minute/${fromStr}/${toStr}?adjusted=true&sort=asc&apiKey=${POLYGON_API_KEY}`;
-
+      const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`;
       const response = await fetch(url);
       const data = await response.json();
+      const quote = data["Global Quote"];
+      if (!quote || !quote["05. price"]) throw new Error("No data");
 
-      if (!data.results) throw new Error("No candle data returned");
-
-      const candles = data.results.map(c => ({
-        time: Math.floor(c.t / 1000),
-        open: c.o,
-        high: c.h,
-        low: c.l,
-        close: c.c
-      }));
-
-      // Update current price (latest candle close)
-      const currentPrice = candles[candles.length - 1].close;
+      const price = parseFloat(quote["05. price"]);
       const priceElem = document.getElementById(`price-${symbol}`);
-      priceElem.textContent = `$${currentPrice.toFixed(2)}`;
-
-      if (!chartObjects[symbol]) {
-        const chartDiv = document.getElementById(`chart-${symbol}`);
-        const chart = LightweightCharts.createChart(chartDiv, {
-          layout: { backgroundColor: "#1e293b", textColor: "#e5e7eb" },
-          grid: { vertLines: { color: "#2b2f3a" }, horzLines: { color: "#2b2f3a" } }
-        });
-
-        const candleSeries = chart.addCandlestickSeries({
-          upColor: "#22c55e",
-          borderUpColor: "#22c55e",
-          wickUpColor: "#22c55e",
-          downColor: "#ef4444",
-          borderDownColor: "#ef4444",
-          wickDownColor: "#ef4444"
-        });
-
-        candleSeries.setData(candles);
-        chartObjects[symbol] = { candleSeries };
-      } else {
-        chartObjects[symbol].candleSeries.setData(candles);
-      }
+      priceElem.textContent = `$${price.toFixed(2)}`;
     } catch (err) {
-      console.error("Error fetching data for", symbol, err);
+      console.error("Error fetching price for", symbol, err);
       const priceElem = document.getElementById(`price-${symbol}`);
       if (priceElem) priceElem.textContent = "Error";
     }
@@ -112,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Auto-refresh every 60 seconds
   setInterval(() => {
-    trackedStocks.forEach(symbol => fetchPolygonData(symbol));
+    trackedStocks.forEach(symbol => fetchStockPrice(symbol));
   }, 60000);
 });
+
