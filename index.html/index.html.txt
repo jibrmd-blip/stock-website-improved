@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Market Tracker</title>
+
+  <!-- Link CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1>📊 Stock Market Tracker</h1>
+    <p>A simple market tracking website</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Track a Stock</h2>
+
+      <input
+        type="text"
+        id="symbol"
+        placeholder="Enter stock symbol (AAPL, TSLA)"
+      />
+
+      <button id="trackBtn">Track</button>
+
+      <div id="result"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built for GitHub Pages</p>
+  </footer>
+
+  <!-- Link JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
